@@ -6,6 +6,25 @@ import json
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
 }
+def extract_minutes(time_text):
+    words = time_text.split()
+    
+    if not words:  # Handle empty strings
+        return 0
+    
+    if words[0].isdigit():  # Check if the first word is a number
+        num = int(words[0])
+        if "hour" in time_text:
+            return num * 60  # Convert hours to minutes
+        elif "minute" in time_text:
+            return num  # Already in minutes
+        elif "day" in time_text:
+            return num * 1440  # Convert days to minutes (1 day = 1440 minutes)
+    elif "Just" in words:  # Handle "Just now" case
+        return 1  # Assume 1 minute for "Just now"
+    
+    # If format is unknown, return 0
+    return 0  
 
 def get_linkedin_job_ids(keyword, time_filter, save_path):
     """
@@ -29,8 +48,8 @@ def get_linkedin_job_ids(keyword, time_filter, save_path):
             time_posted = job.find("time", class_="job-search-card__listdate--new")
             if job_id and time_posted:
                 time_text = time_posted.text.strip()
-                total_minutes = int(time_text.split()[0]) * 60 if "hour" in time_text else int(time_text.split()[0])
-
+                total_minutes = extract_minutes(time_text)
+                
                 job_data.append({"Job ID": job_id, "Time Posted": time_text, "Minutes": total_minutes})
 
         if not job_data:
