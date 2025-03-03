@@ -7,24 +7,17 @@ HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
 }
 def extract_minutes(time_text):
+    if not time_text:
+        return 0  # Handle empty or None input
+
     words = time_text.split()
     
-    if not words:  # Handle empty strings
-        return 0
-    
-    if words[0].isdigit():  # Check if the first word is a number
+    if words[0].isdigit():  
         num = int(words[0])
-        if "hour" in time_text:
-            return num * 60  # Convert hours to minutes
-        elif "minute" in time_text:
-            return num  # Already in minutes
-        elif "day" in time_text:
-            return num * 1440  # Convert days to minutes (1 day = 1440 minutes)
-    elif "Just" in words:  # Handle "Just now" case
-        return 1  # Assume 1 minute for "Just now"
-    
-    # If format is unknown, return 0
-    return 0  
+        multiplier = 60 if "hour" in time_text else 1440 if "day" in time_text else 1
+        return num * multiplier
+
+    return 1 if "Just" in time_text else 0  # Handle "Just now", return 0 for unknown formats 
 
 def get_linkedin_job_ids(keyword, time_filter, save_path):
     """
